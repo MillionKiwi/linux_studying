@@ -6,10 +6,23 @@
 #include <sys/wait.h>
 
 
+typedef struct{
+	char acc_no[6];
+	char optype;
+	int amount;
+} Operation;
+
+int operate(Operation oper, int pid ){
+	printf("pid = %d %s %c %d \n", pid, oper.acc_no, oper.optype, oper.amount);
+	return 0;
+}
+
+
 int main(int argc, char *argv[])
 {
 	int i =0;
 	pid_t pid;
+	char line[100];
 	srand(time(NULL));
 
 
@@ -17,8 +30,13 @@ int main(int argc, char *argv[])
 		pid = fork();
 
 		if (pid == 0){
-			printf("%d \n", getpid());
-			usleep(rand() % 1000000);
+			FILE* fp = fopen("operation.dat","r");
+			Operation oper;
+			while (fgets(line, 100, fp) != NULL){
+				sscanf(line, "%s %c %d", oper.acc_no, &oper.optype, &oper.amount);
+				operate(oper,getpid());
+				usleep(rand() % 1000001);
+			}
 			exit(0);
 		}
 	}
